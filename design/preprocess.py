@@ -7,4 +7,4 @@ def AG_NEWS(dataset:Dataset):
     Pre-processing ag_news dataset
     '''
     for item in tqdm(dataset):
-        item['text'] = item['text'].replace("\\", " ").replace(" -- ",": ").replace(" - ",": ").replace("  "," ")
+        item['text'] = item['text'].replace("\\", " ").replace(" -- ",": ").replace(" - ",": ").replace("  "," ").lower()

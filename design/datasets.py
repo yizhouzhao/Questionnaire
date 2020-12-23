@@ -5,6 +5,7 @@ from tqdm.auto import tqdm
 
 from datasets import load_dataset
 from transformers import AutoTokenizer, T5ForConditionalGeneration
+from fuzzywuzzy import process
 
 from .util import generate_answer_text, generate_unifiedqa_text
 from .preprocess import *
@@ -18,7 +19,11 @@ class QuestionCollection(object):
     def __init__(self, question_file:str):
         #load question
         self.question_file = question_file
-        self.question_answer_list = self.load_questions()
+        self.question_list = [] # question in text
+        self.answer_list = [] # answer in text
+
+        self.raw_answer_list = [] # answer in choice
+        self.load_questions()
 
     def load_questions(self):
         '''
@@ -26,19 +31,23 @@ class QuestionCollection(object):
         :return:
             a list containing questions and answers
         '''
-        question_answer_list = []
         df = pd.read_csv(self.question_file)
         for i in range(len(df)):
             question_type = df.iloc[i][0]
             question = df.iloc[i][1]
             if question_type == "Multiple-choice":
-                answer = generate_answer_text(df.iloc[i][2].split(","), add_change_line=False)
+                raw_answer = df.iloc[i][2].split(",")
             else: #question_type == "Yes-no":
-                answer = generate_answer_text(["yes","no"], add_change_line=False)
+                raw_answer = ["yes","no"]
+            
+            self.raw_answer_list.append(raw_answer)
 
-            question_answer_list.append([question.lower(), answer.lower()])
+            answer = generate_answer_text(raw_answer, add_change_line=False)
+            self.question_list.append(question.lower())
+            self.answer_list.append(answer.lower())
 
-        return question_answer_list
+    def __len__(self):
+        return len(self.question_list)
     
 
 class QAMachine(object):
@@ -69,7 +78,7 @@ class QAMachine(object):
         self.load_model()
 
         # survey
-        self.survey = np.zeros(shape=(len(self.dataset), len(self.question_collection.question_answer_list)))
+        self.survey = np.zeros(shape=(len(self.dataset), len(self.question_collection)))
 
     def load_dataset(self, split="train"):
         '''
@@ -100,12 +109,22 @@ class QAMachine(object):
         '''
         running Q&A on dataset
         '''
-        for question_id in question_id_list:
-            print("Datasets QAMachine conduct survey on question {} : {}".format(str(question_id), 
-                self.question_collection.question_answer_list[question_id][0]))
-            for i in range(len(self.dataset)):
-                pass
-
+        
+        #print("Datasets QAMachine conduct survey on question {} : {}".format(str(question_id), 
+        #    self.question_collection.question_answer_list[question_id][0]))
+        for i in tqdm(range(len(self.dataset))):
+            for question_id in question_id_list:
+                text = generate_unifiedqa_text(self.question_collection.question_list[question_id], 
+                            self.question_collection.answer_list[question_id], 
+                            self.dataset[i]['text'])
+                question_answer = self.run_model(text)[0]
+                answer_choice = process.extractOne(question_answer, self.question_collection.raw_answer_list[question_id])[0]
+                answer_index = self.question_collection.raw_answer_list[question_id].index(answer_choice)
+                print("Datasets QAMachine conduct survey", text, question_answer, answer_choice, answer_index)
+                self.survey[i][question_id] = 1.0 if answer_index < 1 else -1.0
+                
+    def save_survey(self, survey_file_path):
+        np.savetxt("survey.csv", self.survey, delimiter=",")
 
 
 
