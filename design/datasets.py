@@ -1,4 +1,5 @@
 # model
+import torch
 import numpy as np
 import pandas as pd
 from tqdm.auto import tqdm
@@ -64,6 +65,10 @@ class QAMachine(object):
         self.dataset_name = dataset_name
         self.model_name = model_name
 
+        # device
+        self.use_cuda = True and torch.cuda.is_available()
+        self.device = torch.device("cuda:0" if self.use_cuda else "cpu")
+
         #load question collection
         self.question_collection = QuestionCollection(question_collection_file)
 
@@ -99,9 +104,13 @@ class QAMachine(object):
         print("load model......")
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         self.model = T5ForConditionalGeneration.from_pretrained(self.model_name)
+        if self.use_cuda:
+            self.model = self.model.cuda()
 
     def run_model(self, input_string, **generator_args):
-        input_ids = self.tokenizer.encode(input_string, return_tensors="pt")
+        input_ids = self.tokenizer(input_string, padding=True, truncation=True, return_tensors="pt").input_ids
+        if self.use_cuda:
+            input_ids = input_ids.to(self.device)
         res = self.model.generate(input_ids, **generator_args)
         return [self.tokenizer.decode(x) for x in res]
 
@@ -113,18 +122,24 @@ class QAMachine(object):
         #print("Datasets QAMachine conduct survey on question {} : {}".format(str(question_id), 
         #    self.question_collection.question_answer_list[question_id][0]))
         for i in tqdm(range(len(self.dataset))):
+            batch_sentences = []
             for question_id in question_id_list:
                 text = generate_unifiedqa_text(self.question_collection.question_list[question_id], 
                             self.question_collection.answer_list[question_id], 
                             self.dataset[i]['text'])
-                question_answer = self.run_model(text)[0]
-                answer_choice = process.extractOne(question_answer, self.question_collection.raw_answer_list[question_id])[0]
+                batch_sentences.append(text)
+
+            question_answers = self.run_model(batch_sentences)
+            #print(question_answers)
+
+            for question_index, question_id in enumerate(question_id_list):
+                answer_choice = process.extractOne(question_answers[question_index], self.question_collection.raw_answer_list[question_id])[0]
                 answer_index = self.question_collection.raw_answer_list[question_id].index(answer_choice)
-                print("Datasets QAMachine conduct survey", text, question_answer, answer_choice, answer_index)
+                #print("Datasets QAMachine conduct survey", text, question_answer, answer_choice, answer_index)
                 self.survey[i][question_id] = 1.0 if answer_index < 1 else -1.0
-                
+
     def save_survey(self, survey_file_path):
-        np.savetxt("survey.csv", self.survey, delimiter=",")
+        np.savetxt(survey_file_path, self.survey, delimiter=",")
 
 
 
