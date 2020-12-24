@@ -3,7 +3,7 @@
 pip install -r requirements.txt
 
 # Run survey
-python run_survey.py --dataset ag_news
+~~python run_survey.py --dataset ag_news~~
 python run_survey.py --dataset rotten_tomatoes
 python run_survey.py --dataset dbpedia_14
 python run_survey.py --dataset yelp_polarity
