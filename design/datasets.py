@@ -55,15 +55,17 @@ class QAMachine(object):
     '''
     A machine to hold dataset and qa-model to perform question and answering
     '''
-    def __init__(self, question_collection_file:str, dataset_name:str, model_name:str="allenai/unifiedqa-t5-large"):
+    def __init__(self, question_collection_file:str, dataset_name:str, model_name:str="allenai/unifiedqa-t5-large", dataset_split="train"):
         '''
         :params:
             question_collection_file: the name of the question file
             dataset_name: the name of the dataset listed in #from datasets import list_datasets
             model_name: the name of the model in UnifiedQA
         '''
+        self.question_collection_file = question_collection_file
         self.dataset_name = dataset_name
         self.model_name = model_name
+        self.dataset_split = dataset_split
 
         # device
         self.use_cuda = True and torch.cuda.is_available()
@@ -85,14 +87,14 @@ class QAMachine(object):
         # survey
         self.survey = np.zeros(shape=(len(self.dataset), len(self.question_collection)))
 
-    def load_dataset(self, split="train"):
+    def load_dataset(self):
         '''
         Load dataset
         :params:
             split: train or test
         :return:
         '''
-        self.dataset = load_dataset(self.dataset_name, split=split)
+        self.dataset = load_dataset(self.dataset_name, split=self.dataset_split)
         self.preprocess_dataset()
         self.label_set = set([item["label"] for item in self.dataset])
 
@@ -122,6 +124,7 @@ class QAMachine(object):
         #print("Datasets QAMachine conduct survey on question {} : {}".format(str(question_id), 
         #    self.question_collection.question_answer_list[question_id][0]))
         for i in tqdm(range(len(self.dataset))):
+        #for i in tqdm(range(100)):
             batch_sentences = []
             for question_id in question_id_list:
                 text = generate_unifiedqa_text(self.question_collection.question_list[question_id], 
