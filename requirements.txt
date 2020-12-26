@@ -4,3 +4,5 @@ sentencepiece
 protobuf
 datasets
 fuzzywuzzy
+xgboost
+scikit-learn
