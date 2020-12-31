@@ -4,7 +4,7 @@ import spacy
 
 nlp =  spacy.load("en_core_web_sm")
 
-def question_good_or_bad(word, good_or_bad = "good"):
+def generate_noun_question_good_or_bad(word, good_or_bad = "good"):
     '''
     Generate a question about a word saying good or bad 
     '''
@@ -19,7 +19,7 @@ def question_good_or_bad(word, good_or_bad = "good"):
         else:
             return "is the text saying anything {} about a {}?".format(good_or_bad, word)
 
-def generate_one_question(word, noun_question_type = "exist"):
+def generate_one_question(word, word_pos, noun_question_type = "exist"):
     '''
     Generate one question from the key word
     :params:
@@ -28,9 +28,15 @@ def generate_one_question(word, noun_question_type = "exist"):
     :return:
         a question
     '''
-    token = nlp(word)[0]
-
-
+    if word_pos in ["VERB", "verb", "v"]:
+        return "is anybody {} mentioned in the text?".format(word)
+    elif word_pos in ["ADJ", "adj"]:
+        return "is there anything {} mentioned in the text?".format(word) 
+    else: #noun
+        if noun_question_type == "exist":
+            return "is anything related to {} mentioned in the text?".format(word)
+        else: #noun_question_type == "good or bad":
+            return generate_noun_question_good_or_bad(word, noun_question_type)
 
 def generate_questions(trigger:str, source="datamuse", appendix:list=None, max_question_num=10, question_type="exist"):
     '''
@@ -53,16 +59,22 @@ def generate_questions(trigger:str, source="datamuse", appendix:list=None, max_q
         objects = requests.get(url_link).json()
         for obj in objects:
             if 'adj' in obj['tags']:
-                question_list.append("is there anything {} mentioned in the text?".format(obj['word']))
+                one_question = generate_one_question(obj['word'], "adj")
+                question_list.append(one_question)
+                #question_list.append("is there anything {} mentioned in the text?".format(obj['word']))
             elif 'n' in obj['tags']:
                 if question_type == "exist":
-                    question_list.append("is anything related to {} mentioned in the text?".format(obj['word']))
+                    one_question = generate_one_question(obj['word'], "n", "exist")
+                    question_list.append(one_question)
                 else:#question_type == "good or bad":
-                    question_list.append(question_good_or_bad(obj['word'], "good"))
-                    question_list.append(question_good_or_bad(obj['word'], "bad"))
+                    one_question = generate_one_question(obj['word'], "n", "good")
+                    question_list.append(one_question)
+                    one_question = generate_one_question(obj['word'], "n", "bad")
+                    question_list.append(one_question)
             elif 'v' in obj['tags']:
-                question_list.append("is {} mentioned in the text?".format(obj['word'])) #病句
-            
+                one_question = generate_one_question(obj['word'], "v")
+                question_list.append(one_question)
+               
             if len(question_list) >= max_question_num:
                 break
     elif source == "conceptnet":
