@@ -6,3 +6,4 @@ datasets
 fuzzywuzzy
 xgboost
 scikit-learn
+spacy
