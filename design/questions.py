@@ -58,38 +58,40 @@ def generate_questions(trigger:str, source="datamuse", appendix:list=None, max_q
         print("generate questions from link: ", url_link)
         objects = requests.get(url_link).json()
         for obj in objects:
-            if 'adj' in obj['tags']:
-                one_question = generate_one_question(obj['word'], "adj")
-                question_list.append(one_question)
-                #question_list.append("is there anything {} mentioned in the text?".format(obj['word']))
-            elif 'n' in obj['tags']:
-                if question_type == "exist":
-                    one_question = generate_one_question(obj['word'], "n", "exist")
+            obj["word"] = obj["word"].lower()
+            if not trigger in obj["word"]: #if is meaningful
+                if 'adj' in obj['tags']:
+                    one_question = generate_one_question(obj['word'], "adj")
                     question_list.append(one_question)
-                else:#question_type == "good or bad":
-                    one_question = generate_one_question(obj['word'], "n", "good")
+                    #question_list.append("is there anything {} mentioned in the text?".format(obj['word']))
+                elif 'n' in obj['tags']:
+                    if question_type == "exist":
+                        one_question = generate_one_question(obj['word'], "n", "exist")
+                        question_list.append(one_question)
+                    else:#question_type == "good or bad":
+                        one_question = generate_one_question(obj['word'], "n", "good")
+                        question_list.append(one_question)
+                        one_question = generate_one_question(obj['word'], "n", "bad")
+                        question_list.append(one_question)
+                elif 'v' in obj['tags']:
+                    one_question = generate_one_question(obj['word'], "v")
                     question_list.append(one_question)
-                    one_question = generate_one_question(obj['word'], "n", "bad")
-                    question_list.append(one_question)
-            elif 'v' in obj['tags']:
-                one_question = generate_one_question(obj['word'], "v")
-                question_list.append(one_question)
-               
-            if len(question_list) >= max_question_num:
-                break
+                
+                if len(question_list) >= max_question_num:
+                    break
     elif source == "conceptnet":
         assert appendix is None
         url_link = "http://api.conceptnet.io/related/c/en/{}?filter=/c/en".format(trigger)
         print("generate questions from link: ", url_link)
         objects = requests.get(url_link).json()['related']
         for obj in objects:
-            related_word = obj['@id'].split('/')[-1]
-            if related_word in nlp.vocab and (not related_word.startswith(trigger)): #if is meaningful
+            related_word = obj['@id'].split('/')[-1].replace("_", " ").lower()
+            if not trigger in related_word.startswith: #if is meaningful
                 if question_type == "exist":
-                    question_list.append("is anything related to {} mentioned in the text?".format(obj['word']))
+                    question_list.append("is anything related to {} mentioned in the text?".format(related_word))
                 else:#question_type == "good or bad":
-                    question_list.append(question_good_or_bad(obj['word'], "good"))
-                    question_list.append(question_good_or_bad(obj['word'], "bad"))
+                    question_list.append(generate_noun_question_good_or_bad(related_word, "good"))
+                    question_list.append(generate_noun_question_good_or_bad(related_word, "bad"))
             if len(question_list) >= max_question_num:
                 break
     
