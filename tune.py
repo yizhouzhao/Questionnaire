@@ -4,8 +4,6 @@ from datasets import load_dataset
 from transformers import Adafactor
 from tqdm.auto import tqdm
 
-
-
 from thirdparty.other_models import AnotherNet
 
 batch_size = 8
@@ -14,6 +12,8 @@ epochs = 1
 learning_rate = 1e-3
 max_input_length = 100
 
+def calculate_accuracy(logits, labels):
+    return (torch.sum(torch.argmax(logits,dim=1) == labels) / len(labels)).item()
 
 def train(dataset_name:str, model_name:str):
     '''
@@ -42,7 +42,7 @@ def train(dataset_name:str, model_name:str):
     for epoch in range(epochs):
         #------------------------------------------Train---------------------------------------------
         model.train()
-        train_loss_list = []
+        train_acc_list = []
         for batch_data in tqdm(train_data_loader):
             batch_x = model.tokenizer(batch_data['text'], padding=True, truncation=True, max_length=max_input_length, return_tensors="pt").input_ids
             batch_label = batch_data['label']
@@ -58,11 +58,11 @@ def train(dataset_name:str, model_name:str):
             loss.backward()
             optimizer.step()
 
-            train_loss_list.append(loss.item())
+            train_acc_list.append(calculate_accuracy(output_logits, batch_label))
 
         #------------------------------------------Test---------------------------------------------
         model.eval()
-        test_loss_list = []
+        test_acc_list = []
         for batch_data in tqdm(test_data_loader):
             batch_x = model.tokenizer(batch_data['text'], padding=True, truncation=True, max_length=max_input_length, return_tensors="pt").input_ids
             batch_label = batch_data['label']
@@ -74,9 +74,9 @@ def train(dataset_name:str, model_name:str):
             output_logits = model(batch_x)
             loss = loss_fct(output_logits, batch_label)
 
-            test_loss_list.append(loss.item())
+            test_acc_list.append(calculate_accuracy(output_logits, batch_label))
 
-        print("epoch {} train loss {} test loss {}".format(epoch, np.mean(train_loss_list), np.mean(test_loss_list)))
+        print("epoch {} train acc {} test acc {}".format(epoch, np.mean(train_acc_list), np.mean(test_acc_list)))
 
 if __name__ == '__main__':
     dataset_name = "rotten_tomatoes"
