@@ -3,8 +3,12 @@ import torch
 from torch import nn
 from torch.nn import CrossEntropyLoss, MSELoss
 
-from transformers import XLNetConfig, XLNetModel, XLNetTokenizer
+from transformers import XLNetModel, XLNetTokenizer
 from transformers.modeling_utils import SequenceSummary
+
+from transformers.models.roberta.modeling_roberta import RobertaClassificationHead
+from transformers import RobertaTokenizer, RobertaModel
+
 
 class AnotherNet(nn.Module):
     def __init__(self, model_name="XLNet", num_labels=2):
@@ -13,12 +17,20 @@ class AnotherNet(nn.Module):
         if model_name == "XLNet":
             self.transformer = XLNetModel.from_pretrained('xlnet-base-cased')
             self.tokenizer = XLNetTokenizer.from_pretrained('xlnet-base-cased')
+        elif model_name == "Roberta":
+            self.transformer = RobertaModel.from_pretrained('roberta-base')
+            self.tokenizer = RobertaTokenizer.from_pretrained('roberta-base')
         
         self.config = self.transformer.config
         self.config.num_labels = num_labels
-    
-        self.sequence_summary = SequenceSummary(self.config)
-        self.logits_proj = nn.Linear(self.config.d_model, self.config.num_labels)
+
+        if model_name == "XLNet":
+            self.classification_head = nn.Sequential(
+                SequenceSummary(self.config),
+                nn.Linear(self.config.d_model, self.config.num_labels)
+            )
+        elif model_name == "Roberta":
+            self.classification_head = RobertaClassificationHead(self.config)
     
     def forward(self, input_ids):
         r"""
@@ -30,9 +42,7 @@ class AnotherNet(nn.Module):
 
         transformer_outputs = self.transformer(input_ids)
         output = transformer_outputs[0]
-
-        output = self.sequence_summary(output)
-        logits = self.logits_proj(output)
+        logits = self.classification_head(output)
 
         return logits
 

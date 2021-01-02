@@ -80,7 +80,7 @@ def train(dataset_name:str, model_name:str):
 
 if __name__ == '__main__':
     dataset_name = "rotten_tomatoes"
-    model_name = "XLNet"
+    model_name = "Roberta" # "XLNet" # 
 
     train(dataset_name, model_name)
 
