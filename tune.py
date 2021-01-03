@@ -29,11 +29,11 @@ def train(dataset_name:str, model_name:str):
     train_data_sampler = RandomDataSampler(max_train_samples, len(train_dataset)) if max_train_samples is not None and max_train_samples < len(train_dataset) else None
     test_data_sampler = RandomDataSampler(max_test_samples, len(test_dataset)) if max_test_samples is not None and max_test_samples < len(test_dataset) else None
     
-    #train_data_loader = torch.utils.data.DataLoader(train_dataset, sampler=train_data_sampler, batch_size=batch_size)
-    #test_data_loader = torch.utils.data.DataLoader(test_dataset, sampler=test_data_sampler, batch_size=batch_size)
+    train_data_loader = torch.utils.data.DataLoader(train_dataset, sampler=train_data_sampler, batch_size=batch_size)
+    test_data_loader = torch.utils.data.DataLoader(test_dataset, sampler=test_data_sampler, batch_size=batch_size)
 
-    train_data_loader = torch.utils.data.DataLoader(train_dataset, shuffle=True, batch_size=batch_size)
-    test_data_loader = torch.utils.data.DataLoader(test_dataset, shuffle=True, batch_size=batch_size)
+    #train_data_loader = torch.utils.data.DataLoader(train_dataset, shuffle=True, batch_size=batch_size)
+    #test_data_loader = torch.utils.data.DataLoader(test_dataset, shuffle=True, batch_size=batch_size)
 
 
     # init model
