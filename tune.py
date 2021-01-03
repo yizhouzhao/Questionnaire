@@ -9,7 +9,7 @@ from thirdparty.other_models import AnotherNet, RandomDataSampler
 batch_size = 16
 use_cuda = True and torch.cuda.is_available()
 epochs = 100
-learning_rate = 1e-3
+learning_rate = 2e-5
 max_input_length = 100
 max_train_samples = 1024
 max_test_samples = 1024
@@ -68,8 +68,8 @@ def train(dataset_name:str, model_name:str):
 
             train_acc_list.append(loss.item())
 
-            if len(train_acc_list) % 20 == 0:
-                print("training loss:", loss.item())
+            #if len(train_acc_list) % 20 == 0:
+            #    print("training loss:", loss.item())
 
             #train_acc_list.append(calculate_accuracy(output_logits, batch_label))
 
