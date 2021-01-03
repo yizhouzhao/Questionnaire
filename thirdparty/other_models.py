@@ -1,4 +1,6 @@
 #other models for text classification
+import random
+
 import torch
 from torch import nn
 from torch.nn import CrossEntropyLoss, MSELoss
@@ -8,6 +10,18 @@ from transformers.modeling_utils import SequenceSummary
 
 from transformers.models.roberta.modeling_roberta import RobertaClassificationHead
 from transformers import RobertaTokenizer, RobertaModel
+
+class RandomDataSampler(torch.utils.data.Sampler):
+    def __init__(self, num_samples, total_samples):
+        index_permutation = [i for i in range(total_samples)]
+        random.shuffle(index_permutation)
+        self.mask = index_permutation[:num_samples]
+
+    def __iter__(self):
+        return (i for i in self.mask)
+
+    def __len__(self):
+        return len(self.mask)
 
 
 class AnotherNet(nn.Module):
