@@ -18,6 +18,9 @@ python run_survey.py --dataset amazon_polarity
 python run_survey.py --dataset amazon_us_reviews
 
 
+# Run survey for task-sensitive questions
+
+python run_survey.py --dataset rotten_tomatoes --questionnaire moviequestions
 
 
 

@@ -29,7 +29,7 @@ if __name__ == '__main__':
     print("Start Time: ", current_time)
 
     QAM = QAMachine(question_collection_file=questionnaire_path, dataset_name=args.dataset, model_name=qa_model_name, dataset_split=args.dataset_split)
-    QAM.conduct_survey(question_id_list=[j for j in range(len(QAM.question_collection))])
+    QAM.conduct_survey_along_questions(question_id_list=[j for j in range(len(QAM.question_collection))])
     QAM.save_survey("record/survey_{}({})_{}_{}.csv".format(args.dataset, args.dataset_split, args.questionnaire, args.unifiedqa_model))
 
     #print time

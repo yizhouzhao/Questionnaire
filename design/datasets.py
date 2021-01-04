@@ -55,7 +55,9 @@ class QAMachine(object):
     '''
     A machine to hold dataset and qa-model to perform question and answering
     '''
-    def __init__(self, question_collection_file:str, dataset_name:str, model_name:str="allenai/unifiedqa-t5-large", dataset_split="train"):
+    def __init__(self, question_collection_file:str, dataset_name:str, 
+                model_name:str="allenai/unifiedqa-t5-large", dataset_split="train",
+                batch_size = 32):
         '''
         :params:
             question_collection_file: the name of the question file
@@ -83,6 +85,7 @@ class QAMachine(object):
         self.model = None
         self.tokenizer = None
         self.load_model()
+        self.batch_size = batch_size #batch size to run the QA model
 
         # survey
         self.survey = np.zeros(shape=(len(self.dataset), len(self.question_collection)))
@@ -116,9 +119,9 @@ class QAMachine(object):
         res = self.model.generate(input_ids, **generator_args)
         return [self.tokenizer.decode(x) for x in res]
 
-    def conduct_survey(self, question_id_list:list):
+    def conduct_survey_along_questions(self, question_id_list:list):
         '''
-        running Q&A on dataset
+        running Q&A on dataset on questions(question_id_list)
         '''
         
         #print("Datasets QAMachine conduct survey on question {} : {}".format(str(question_id), 
@@ -141,6 +144,36 @@ class QAMachine(object):
                 #print("Datasets QAMachine conduct survey", text, question_answer, answer_choice, answer_index)
                 self.survey[i][question_id] = 1.0 if answer_index < 1 else -1.0
 
+    def conduct_survey(self, data_index_list:list, question_id_list:list):
+        '''
+        running Q&A on dataset on questions(question_id_list) for data
+        '''
+        if question_id_list == None:
+            question_id_list = [i for i in range(len(self.question_collection))]
+        if data_index_list == None:
+            data_index_list = [i for i in range(len(self.dataset))]
+
+        for i in tqdm((data_index_list)):
+        #for i in tqdm(range(100)):
+            for j in range(0, len(question_id_list), self.batch_size):
+                batch_question_id_list = question_id_list[j: min(j + self.batch_size, len(question_id_list))]
+
+                batch_sentences = []
+                for question_id in batch_question_id_list:
+                    text = generate_unifiedqa_text(self.question_collection.question_list[question_id], 
+                                self.question_collection.answer_list[question_id], 
+                                self.dataset[i]['text'])
+                    batch_sentences.append(text)
+
+                question_answers = self.run_model(batch_sentences)
+                #print(question_answers)
+
+                for question_index, question_id in enumerate(batch_question_id_list):
+                    answer_choice = process.extractOne(question_answers[question_index], self.question_collection.raw_answer_list[question_id])[0]
+                    answer_index = self.question_collection.raw_answer_list[question_id].index(answer_choice)
+                    #print("Datasets QAMachine conduct survey", text, question_answer, answer_choice, answer_index)
+                    self.survey[i][question_id] = 1.0 if answer_index < 1 else -1.0
+    
     def save_survey(self, survey_file_path):
         np.savetxt(survey_file_path, self.survey, delimiter=",")
 
