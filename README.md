@@ -36,3 +36,7 @@ python run_survey.py --dataset yelp_review_full --questionnaire restaurantquesti
 python run_survey.py --dataset amazon_polarity --questionnaire storequestions
 
 python run_survey.py --dataset amazon_us_reviews --questionnaire storequestions
+
+# Bash script
+
+job.sh
