@@ -57,7 +57,7 @@ class QAMachine(object):
     '''
     def __init__(self, question_collection_file:str, dataset_name:str, 
                 model_name:str="allenai/unifiedqa-t5-large", dataset_split="train",
-                batch_size = 16):
+                batch_size = 32):
         '''
         :params:
             question_collection_file: the name of the question file
