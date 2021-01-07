@@ -57,7 +57,7 @@ class QAMachine(object):
     '''
     def __init__(self, question_collection_file:str, dataset_name:str, 
                 model_name:str="allenai/unifiedqa-t5-large", dataset_split="train",
-                batch_size = 32):
+                batch_size = 16):
         '''
         :params:
             question_collection_file: the name of the question file
@@ -113,7 +113,7 @@ class QAMachine(object):
             self.model = self.model.cuda()
 
     def run_model(self, input_string, **generator_args):
-        input_ids = self.tokenizer(input_string, padding=True, truncation=True, return_tensors="pt").input_ids
+        input_ids = self.tokenizer(input_string, padding=True, truncation=True, max_length=100, return_tensors="pt").input_ids
         if self.use_cuda:
             input_ids = input_ids.to(self.device)
         res = self.model.generate(input_ids, **generator_args)
@@ -144,7 +144,7 @@ class QAMachine(object):
                 #print("Datasets QAMachine conduct survey", text, question_answer, answer_choice, answer_index)
                 self.survey[i][question_id] = 1.0 if answer_index < 1 else -1.0
 
-    def conduct_survey(self, data_index_list:list, question_id_list:list):
+    def conduct_survey(self, data_index_list:list=None, question_id_list:list=None):
         '''
         running Q&A on dataset on questions(question_id_list) for data
         '''
