@@ -10,3 +10,9 @@ g_movie_piror_keywords = ["film", "movie", "projector", "soundtrack", "picture",
 
 
 g_ag_news_keywords = ["world", "sports", "business", "science"]
+
+g_restaurant = ["food", "service"]
+g_restaurant_appendix = [["quality"], ["quality"]]
+
+g_store = ["product", "product"]
+g_store_appendix = [["service"], ["quality"]]

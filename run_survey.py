@@ -13,7 +13,7 @@ def make_args():
     parser.add_argument('--unifiedqa_model', dest="unifiedqa_model", default="unifiedqa-t5-large", type=str, help='qa model name')
     
 
-    return parser.parse_args("")
+    return parser.parse_args()
 
 if __name__ == '__main__':
     # parser = argparse.ArgumentParser(description='generate survey data')
