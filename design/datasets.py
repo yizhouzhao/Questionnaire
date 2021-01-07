@@ -110,7 +110,7 @@ class QAMachine(object):
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         self.model = T5ForConditionalGeneration.from_pretrained(self.model_name)
         if self.use_cuda:
-            self.model = self.model.cuda()
+            self.model = self.model.to(self.device)
 
     def run_model(self, input_string, **generator_args):
         input_ids = self.tokenizer(input_string, padding=True, truncation=True, max_length=100, return_tensors="pt").input_ids
