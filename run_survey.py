@@ -11,8 +11,8 @@ def make_args():
     parser.add_argument('--dataset_split', dest="dataset_split", default="train", type=str, help='dataset split: train or test')
     parser.add_argument('--questionnaire', dest='questionnaire', default="basicquestions", type=str, help="questionnaire path")
     parser.add_argument('--unifiedqa_model', dest="unifiedqa_model", default="unifiedqa-t5-large", type=str, help='qa model name')
+    parser.add_argument('--gpu', dest="gpu", default=0, type=int, help='gpu index')
     
-
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -28,7 +28,8 @@ if __name__ == '__main__':
     current_time = now.strftime("%m/%d/%Y %H:%M:%S")
     print("Start Time: ", current_time)
 
-    QAM = QAMachine(question_collection_file=questionnaire_path, dataset_name=args.dataset, model_name=qa_model_name, dataset_split=args.dataset_split)
+    QAM = QAMachine(question_collection_file=questionnaire_path, dataset_name=args.dataset, 
+                    model_name=qa_model_name, dataset_split=args.dataset_split,gpu_index=args.gpu)
     #QAM.conduct_survey_along_questions(question_id_list=[j for j in range(len(QAM.question_collection))])
     QAM.conduct_survey()
     

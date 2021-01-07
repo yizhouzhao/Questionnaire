@@ -57,7 +57,7 @@ class QAMachine(object):
     '''
     def __init__(self, question_collection_file:str, dataset_name:str, 
                 model_name:str="allenai/unifiedqa-t5-large", dataset_split="train",
-                batch_size = 32):
+                batch_size = 32, gpu_index=0):
         '''
         :params:
             question_collection_file: the name of the question file
@@ -71,7 +71,7 @@ class QAMachine(object):
 
         # device
         self.use_cuda = True and torch.cuda.is_available()
-        self.device = torch.device("cuda:0" if self.use_cuda else "cpu")
+        self.device = torch.device("cuda:{}".format(gpu_index) if self.use_cuda else "cpu")
 
         #load question collection
         self.question_collection = QuestionCollection(question_collection_file)
