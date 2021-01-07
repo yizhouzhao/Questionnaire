@@ -25,7 +25,7 @@ python run_survey.py --dataset amazon_us_reviews
 
 ~~python run_survey.py --dataset rotten_tomatoes --questionnaire moviequestions~~
 
-python run_survey.py --dataset rotten_tomatoes --questionnaire moviequestions
+~~python run_survey.py --dataset imdb --questionnaire moviequestions~~
 
 python run_survey.py --dataset ag_news --questionnaire agnewsquestions
 
