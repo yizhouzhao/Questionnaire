@@ -2,6 +2,8 @@
 
 pip install -r requirements.txt
 
+--------------------------------------------------------------
+12/31/2020
 # Run survey
 ~~python run_survey.py --dataset ag_news~~
 
@@ -17,10 +19,11 @@ python run_survey.py --dataset amazon_polarity
 
 python run_survey.py --dataset amazon_us_reviews
 
-
+----------------------------------------------------------------
+1/7/2020
 # Run survey for task-sensitive questions
 
+~~python run_survey.py --dataset rotten_tomatoes --questionnaire moviequestions~~
+
 python run_survey.py --dataset rotten_tomatoes --questionnaire moviequestions
-
-
 
