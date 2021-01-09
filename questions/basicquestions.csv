@@ -1,20 +1,20 @@
-Type,Question,Answer,Remark
-Multiple-choice,What is the sentiment of the text?,"positive,negative",sentimental analysis
-Yes-no,Is the text informative?,,Plutchik Wheel of Emotions
-Yes-no,Is the text interesting?,,Plutchik Wheel of Emotions
-Yes-no,Do you feel any anger from the text?,,Plutchik Wheel of Emotions
-Yes-no,Do you feel any joy from the text?,,Plutchik Wheel of Emotions
-Yes-no,Do you feel any worry from the text?,,Plutchik Wheel of Emotions
-Yes-no,Do you feel any sadness from the text?,,Plutchik Wheel of Emotions
-Multiple-choice,Is the writting style of the text formal or informal?,"formal,informal",writing style
-Yes-no,Is the text narrative?,,writing style
-Yes-no,Is the text analytical?,,writing style
-Yes-no,Is the text expository?,,writing style
-Yes-no,Is the text persuasive?,,writing style
-Yes-no,Is the text argumentative?,,writing style
-Yes-no,Is there any prediction in the text?,,tense
-Yes-no,Does it tell something happened in the past?,,tense
-Yes-no,Does it tell something happening currently?,,tense
-Yes-no,Is there any question or doubt in the text?,,content
-Yes-no,Is there any hypothesis or assumption in the text?,,content
-Yes-no,Is there any statement or claim in the text?,,content
+Type,Question,Answer,Keyword,Remark
+Multiple-choice,What is the sentiment of the text?,"positive,negative",sentiment,sentimental analysis
+Yes-no,Is the text informative?,,information,Plutchik Wheel of Emotions
+Yes-no,Is the text interesting?,,interesting,Plutchik Wheel of Emotions
+Yes-no,Do you feel any anger from the text?,,anger,Plutchik Wheel of Emotions
+Yes-no,Do you feel any joy from the text?,,joy,Plutchik Wheel of Emotions
+Yes-no,Do you feel any worry from the text?,,worry,Plutchik Wheel of Emotions
+Yes-no,Do you feel any sadness from the text?,,sadness,Plutchik Wheel of Emotions
+Multiple-choice,Is the writting style of the text formal or informal?,"formal,informal",writing style,writing style
+Yes-no,Is the text narrative?,,narrative,writing style
+Yes-no,Is the text analytical?,,analytical,writing style
+Yes-no,Is the text expository?,,expository,writing style
+Yes-no,Is the text persuasive?,,persuasive,writing style
+Yes-no,Is the text argumentative?,,argumentative,writing style
+Yes-no,Is there any prediction in the text?,,prediction,tense
+Yes-no,Does it tell something happened in the past?,,past,tense
+Yes-no,Does it tell something happening currently?,,current,tense
+Yes-no,Is there any question or doubt in the text?,,doubt,content
+Yes-no,Is there any hypothesis or assumption in the text?,,hypo,content
+Yes-no,Is there any statement or claim in the text?,,statement,content

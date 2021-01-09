@@ -1,6 +1,8 @@
 # design for aot
 import numpy as np
+import pandas as pd
 from .questions import *
+from .util import generate_answer_text
 
 class TreeNode():
     '''
@@ -23,6 +25,8 @@ class TreeNode():
 
         # questionnaire
         self.questions = self.generate_questions()
+        self.answers = None
+        self.question_types = None
 
         
         # tree structure
@@ -38,9 +42,14 @@ class TreeNode():
         self.children.append(tree_node)
         tree_node.parent = self
 
+    def set_question(self, question:str):
+        self.questions = [question]
+    
+    def set_answer(self, answer:str):
+        self.answers = [answer]
+
     def __str__(self):
         return "node: " + self.keyword + " " +  self.part_of_speech + " " + self.noun_question_type + " " + self.node_type + " " + str(self.layer)
-
 
     # ----------------------------------Questionnaire----------------------------------------
 
@@ -137,10 +146,56 @@ class AndOrTree():
             print(node.__str__())
             #do something
             self.update_num_simulations(node)
+    
+def generate_subtree_from_keyword(keyword, depth, part_of_speech="n", noun_question_type="good or bad", node_type="or", layer=1, max_children=2):
+    tree_node = TreeNode(keyword, part_of_speech, noun_question_type, node_type="or", layer=layer)
+    if depth == 0:
+        return tree_node
+    else:
+        trigger = keyword
+        url_link = "https://api.datamuse.com/words?rel_trg={}&topics={}&md=p".format(keyword, "")
+        print("generate_subtree_from_keyword {} from link: {}".format(keyword, url_link))
+        objects = requests.get(url_link).json()
+        for i, obj in enumerate(objects):
+            if i > max_children:
+                break
+            obj["word"] = obj["word"].lower()
+            if not trigger in obj["word"]: #if is meaningful
+                child_node = generate_subtree_from_keyword(obj['word'], depth-1, obj['tags'][0], noun_question_type, node_type, layer + 1, max_children)
+                tree_node.add_child(child_node)
+                #question_list.append("is there anything {} mentioned in the text?".format(obj['word']))
+    
+        return tree_node
+
+def generate_subtree_from_csv(csv_file:str, layer=1):
+    df = pd.read_csv(csv_file)
+    subtree_root_node = None
+    for i in range(len(df)):
+        question_type = df.iloc[i][0]
+        question = df.iloc[i][1]
+        if question_type == "Multiple-choice":
+            raw_answer = df.iloc[i][2].split(",")
+        else: #question_type == "Yes-no":
+            raw_answer = ["yes","no"]
+        
+        answer = generate_answer_text(raw_answer)
+        keyword = df.iloc[i][3]
 
 
+        if i == 0:
+            tree_node = TreeNode(keyword, "", "", node_type="or", layer=layer)
+            subtree_root_node = tree_node
+        else:
+            tree_node = TreeNode(keyword, "", "", node_type="or", layer=layer+1)
+            subtree_root_node.add_child(tree_node)
 
-def generate_aot(dataset_type:str, prior_keywords:list, num_layers = 3) -> AndOrTree:
+        tree_node.set_question(question)
+        tree_node.set_answer(answer)
+
+    return subtree_root_node
+
+
+def generate_aot(dataset_type:str, prior_keywords:list, csv_file:str, num_layers = 3) -> AndOrTree:
     if dataset_type == "movie":
         part_of_speech = "n"
         noun_question_type = "good or bad"
@@ -152,27 +207,7 @@ def generate_aot(dataset_type:str, prior_keywords:list, num_layers = 3) -> AndOr
         subtree = generate_subtree_from_keyword(keyword, num_layers-1, part_of_speech, noun_question_type, node_type="or", layer=1)
         tree_root.add_child(subtree)
 
-    return AndOrTree(tree_root)
-    
-def generate_subtree_from_keyword(keyword, depth, part_of_speech="n", noun_question_type="good or bad", node_type="or", layer=0):
-    tree_node = TreeNode(keyword, part_of_speech, noun_question_type, node_type="or", layer=layer)
-    if depth == 0:
-        return tree_node
-    else:
-        trigger = keyword
-        url_link = "https://api.datamuse.com/words?rel_trg={}&topics={}&md=p".format(keyword, "")
-        print("generate_subtree_from_keyword {} from link: {}".format(keyword, url_link))
-        objects = requests.get(url_link).json()
-        for i, obj in enumerate(objects):
-            if i > 2:
-                break
-            obj["word"] = obj["word"].lower()
-            if not trigger in obj["word"]: #if is meaningful
-                child_node = generate_subtree_from_keyword(obj['word'], depth-1, obj['tags'][0], noun_question_type, node_type, layer + 1)
-                tree_node.add_child(child_node)
-                #question_list.append("is there anything {} mentioned in the text?".format(obj['word']))
-    
-        return tree_node
+    csv_subtree = generate_subtree_from_csv(csv_file, layer=1)
+    tree_root.add_child(csv_subtree)
 
-def generate_subtree_from_csv(csv_file):
-    tree_node = TreeNode(keyword, part_of_speech, noun_question_type, node_type="or", layer=layer)
+    return AndOrTree(tree_root)
