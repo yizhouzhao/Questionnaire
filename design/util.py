@@ -24,5 +24,6 @@ def generate_unifiedqa_text(question:str, answer:str, description:str):
     :return
         text string
     '''
-    return "{} \n {} \n {}".format(question, answer, description.lower())
+    qa_string = "{} \n {} \n {}".format(question, answer, description)
+    return qa_string.lower()
 

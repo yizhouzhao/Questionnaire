@@ -25,7 +25,7 @@ class TreeNode():
 
         # questionnaire
         self.questions = self.generate_questions()
-        self.answers = None
+        self.answers = ["yes","no"]
         self.question_types = None
 
         
@@ -45,8 +45,8 @@ class TreeNode():
     def set_question(self, question:str):
         self.questions = [question]
     
-    def set_answer(self, answer:str):
-        self.answers = [answer]
+    def set_answer(self, answer):
+        self.answers = answer
 
     def __str__(self):
         return "node: " + self.keyword + " " +  self.part_of_speech + " " + self.noun_question_type + " " + self.node_type + " " + str(self.layer)
@@ -178,7 +178,7 @@ def generate_subtree_from_csv(csv_file:str, layer=1):
         else: #question_type == "Yes-no":
             raw_answer = ["yes","no"]
         
-        answer = generate_answer_text(raw_answer)
+        #answer = generate_answer_text(raw_answer, add_change_line=False)
         keyword = df.iloc[i][3]
 
 
@@ -190,7 +190,7 @@ def generate_subtree_from_csv(csv_file:str, layer=1):
             subtree_root_node.add_child(tree_node)
 
         tree_node.set_question(question)
-        tree_node.set_answer(answer)
+        tree_node.set_answer(raw_answer)
 
     return subtree_root_node
 
