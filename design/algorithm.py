@@ -14,19 +14,19 @@ from .util import generate_answer_text, generate_unifiedqa_text
 from .aot import *
 
 class AOTMachine():
-    def __init__(self, aot:AndOrTree, dataset_name:str,
+    def __init__(self, aot:AndOrTree,
                 model_name:str="allenai/unifiedqa-t5-large",
                 batch_size = 32, gpu_index=0):
         # property
-        self.dataset_name = dataset_name
+        # self.dataset_name = dataset_name
         self.model_name = model_name
 
         #aot
         self.aot = aot
 
         # load data
-        self.train_dataset = self.load_dataset(split="train") #dataset
-        self.test_dataset = self.load_dataset(split="test") #dataset
+        # self.train_dataset = self.load_dataset(split="train") #dataset
+        # self.test_dataset = self.load_dataset(split="test") #dataset
 
         # device
         self.use_cuda = True and torch.cuda.is_available()
@@ -38,18 +38,18 @@ class AOTMachine():
         self.load_model()
         self.batch_size = batch_size #batch size to run the QA model
 
-    def load_dataset(self, split="train"):
-        '''
-        Load dataset
-        :params:
-            split: train or test
-        :return:
-        '''
-        dataset = load_dataset(self.dataset_name, split=split)
-        #self.preprocess_dataset()
-        #label_set = set([item["label"] for item in dataset])
-
-        return dataset
+    # def load_dataset(self, split="train"):
+    #     '''
+    #     Load dataset
+    #     :params:
+    #         split: train or test
+    #     :return:
+    #     '''
+    #     dataset = load_dataset(self.dataset_name, split=split)
+    #     #self.preprocess_dataset()
+    #     #label_set = set([item["label"] for item in dataset])
+    #
+    #     return dataset
 
     def load_model(self):
         print("load model......")
